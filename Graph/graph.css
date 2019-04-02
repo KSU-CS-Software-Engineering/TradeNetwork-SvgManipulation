@@ -1,6 +1,6 @@
 body {
-	background-image: radial-gradient(#F0F, #000);
-	color: #FFF;
+	background-image: radial-gradient(#833fbc, #000);
+	color: #b8b8ba;
 	text-align: center;
 }
 
@@ -9,7 +9,7 @@ h1{
 }
 
 svg {
-  background-color: #EEF;
+  background-color: #b8b8ba;
   cursor: default;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -60,7 +60,7 @@ text {
   pointer-events: none;
 }
 
-text.id {
+text.name {
   text-anchor: middle;
   font-weight: bold;
 }
