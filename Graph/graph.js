@@ -1,9 +1,33 @@
+/* This code is based off of Ross Kirsling's code as found here:
+http://bl.ocks.org/rkirsling/5001347
+We release this code under the same license, as found below: 
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
 // set up SVG for D3
 const width = 1000;
 const height = 500;
 const colors = d3.scaleOrdinal(d3.schemeCategory10);
 
-d3.select('body').append('h1').text('Trade Route Simulator');
+d3.select('body').append('h1').text('Trade Network Creator');
 
 const svg = d3.select('body')
   .append('svg')
@@ -23,9 +47,6 @@ const links = [];
 // init D3 force layout
 const force = d3.forceSimulation()
   .force('link', d3.forceLink().id((d) => d.id).distance(200))
-  //.force('charge', d3.forceManyBody().strength(-500))
-  //.force('x', d3.forceX(width / 2))
-  //.force('y', d3.forceY(height / 2))
   .on('tick', tick);
 
 // init D3 drag support
@@ -232,9 +253,8 @@ function restart() {
   g.append('svg:text')
     .attr('x', 0)
     .attr('y', 4)
-    .attr('class', 'id')
-    .text((d) => d.id);
-
+	.attr('class', 'name')
+    .text((d) => d.name);
   circle = g.merge(circle);
 
   // set the graph in motion
@@ -252,7 +272,7 @@ function mousedown() {
 
   // insert new node at point
   const point = d3.mouse(this);
-  const node = { id: ++lastNodeId, reflexive: false, x: point[0], y: point[1] };
+  const node = { id: ++lastNodeId, reflexive: false, x: point[0], y: point[1], name: lastNodeId };
   nodes.push(node);
 
   restart();
@@ -294,20 +314,19 @@ let lastKeyDown = -1;
 
 function keydown() {
   d3.event.preventDefault();
-
+  
   if (lastKeyDown !== -1) return;
   lastKeyDown = d3.event.keyCode;
-
-  // ctrl
-  /*if (d3.event.keyCode === 17) {
-    circle.call(drag);
-    svg.classed('ctrl', true);
-  }*/
-
+  
   if (!selectedNode && !selectedLink) return;
 
   switch (d3.event.keyCode) {
     case 8: // backspace
+		//IF NODE IS SELECTED
+		//DELETE ALL TEXT IN IT
+		if(selectedNode) {
+			debugger;
+		}
     case 46: // delete
       if (selectedNode) {
         nodes.splice(nodes.indexOf(selectedNode), 1);
@@ -319,7 +338,8 @@ function keydown() {
       selectedNode = null;
       restart();
       break;
-    case 66: // B
+	case 38: // upArrow
+    case 40: // downArrow
       if (selectedLink) {
         // set link direction to both left and right
         selectedLink.left = true;
@@ -327,25 +347,51 @@ function keydown() {
       }
       restart();
       break;
-    case 76: // L
-      if (selectedLink) {
-        // set link direction to left only
-        selectedLink.left = true;
-        selectedLink.right = false;
-      }
-      restart();
-      break;
-    case 82: // R
-      if (selectedNode) {
-        // toggle node reflexivity
-        selectedNode.reflexive = !selectedNode.reflexive;
-      } else if (selectedLink) {
-        // set link direction to right only
-        selectedLink.left = false;
-        selectedLink.right = true;
-      }
-      restart();
-      break;
+    case 37: // leftArrow
+	    if (selectedLink) {
+			//if there is only one arrow/direction
+			if(selectedLink.left != selectedLink.right) {
+				//set arrow/direction to go the opposite way
+				selectedLink.left = !selectedLink.left;
+				selectedLink.right = !selectedLink.right;
+			}
+			//otherwise, the link is bidirectional. Make it only point "left"
+			else {
+				selectedLink.left = true;
+				selectedLink.right = false;
+			}
+		  
+		}
+		restart();
+		break;
+	
+    case 39: // rightArrow
+		if (selectedLink) {
+			//if there is only one arrow/direction
+			if(selectedLink.left != selectedLink.right) {
+				//set arrow/direction to go the opposite way
+				selectedLink.left = !selectedLink.left;
+				selectedLink.right = !selectedLink.right;
+			}
+			//otherwise, the link is bidirectional. Make it only point "right"
+			else {
+				selectedLink.left = false;
+				selectedLink.right = true;
+			}
+		  
+		}
+		restart();
+		break;
+	default:
+	/*
+		if(selectedNode) {
+			debugger;
+			selectedNode.name = "text";
+		}
+		restart();
+		//IF A NODE IS SELECTED
+		//APPEND TO ITS TEXT WHATEVER LETTER IS PRESSED
+	*/
   }
 }
 
